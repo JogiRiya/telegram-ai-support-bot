@@ -1,0 +1,169 @@
+{
+  "name": "Telegram Bot",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        0,
+        0
+      ],
+      "id": "68e077e3-7dc3-46fc-bc1b-08a9ae095024",
+      "name": "Telegram Trigger",
+      "webhookId": "34a75644-5dee-4ab0-b09b-a0ac2b214bd7",
+      "credentials": {
+        "telegramApi": {
+          "id": "OTnB3wrAg8eHXjwb",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}",
+        "options": {
+          "systemMessage": "\"You are a professional customer support executive. When a user sends you a message, you must reply to them. Rules for your reply:\n1. Your reply must be unique every time. Do not use the same starting words again and again.\n2. Be polite and helpful.\n3. Always end your message with exactly this signature: 'Best regards, Radha'. Do not change this signature.\""
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        224,
+        0
+      ],
+      "id": "bfcdfd87-d98e-4486-9fe7-6f3b41f4f168",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        96,
+        208
+      ],
+      "id": "d1404fbd-446e-4062-9514-99b8eb825bf6",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.message.chat.id}}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        240,
+        208
+      ],
+      "id": "9e51bf53-b79e-4dd0-81cf-957e3742d56c",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $('AI Agent').item.json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        592,
+        0
+      ],
+      "id": "5525c490-feda-48aa-9a9b-2dc8d45889bb",
+      "name": "Send a text message",
+      "webhookId": "34db660c-a02c-4a06-b0dd-0118d1dfe746",
+      "credentials": {
+        "telegramApi": {
+          "id": "OTnB3wrAg8eHXjwb",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "c1f7f017-9426-48f0-bd14-f5a85a38ca71",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4f4585bf411b7b1c99217729972c7ef1ae28f6916bb3f5a28e0bafece55308cf"
+  },
+  "nodeGroups": [],
+  "id": "Nzbl38o5gHAanGX8",
+  "tags": []
+}
